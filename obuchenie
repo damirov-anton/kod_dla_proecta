@@ -25,18 +25,15 @@ def primer():
         else:
             grid_display = f"{sp[0]}\n{sp[1]}\n{sp[8]}\n{sp[2]}\n{sp[3]}\n{sp[4]}\n{sp[5]}\n{sp[6]}\n{sp[7]}"        
 
-        # Создаем окно обучения
         window = tk.Toplevel()
         window.title("Обучение")
         window.geometry("600x400")
         
-        # Инструкция
         instruction = ("В каждой строке, столбце и квадрате 3x3 "
                        "каждая цифра от 1 до 9 должна встречаться только один раз.")
         label_instr = tk.Label(window, text=instruction, wraplength=480, justify="left")
         label_instr.pack(padx=10, pady=10)
         
-        # Отображение судоку
         label_grid = tk.Label(window, text=grid_display, font=("Courier", 16))
         label_grid.pack(pady=10)
         
