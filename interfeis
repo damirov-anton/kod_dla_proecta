@@ -46,6 +46,7 @@ def create_sudoku_app(master, puzzle, solution, num_to_remove):
                 return
         end_time = time.time()
         messagebox.showinfo("Результат", "Верно! Ваши очки: " + str(math.ceil(((num_to_remove * 60) ** 1.5) / (math.ceil((end_time - start_time) ** 0.5)))))
+        exit()        
     create_sudoku_grid()
     start_time = time.time()
     check_button = tk.Button(master, text="Проверить решение", command=lambda: check_solution(start_time, num_to_remove))
