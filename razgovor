@@ -1,0 +1,82 @@
+import tkinter as tk
+
+def start_sudoku_dialog(callback_on_complete=None):
+    root = tk.Toplevel()
+    root.title("Диалог Судоку")
+    root.geometry("400x200")
+    root.resizable(False, False)
+
+    def ask_question():
+        for widget in root.winfo_children():
+            widget.destroy()
+        label = tk.Label(root, text="Вы будете играть в Судоку?", wraplength=380, font=("Arial", 12))
+        label.pack(pady=10)
+
+        def answer_yes():
+            for widget in root.winfo_children():
+                widget.destroy()
+            show_message("Хорошо, тогда приступим к выбору сложности!", show_difficulty_selection)
+
+        def answer_no():
+            for widget in root.winfo_children():
+                widget.destroy()
+            ask_training()
+
+        btn_yes = tk.Button(root, text="Да", width=10, command=answer_yes)
+        btn_yes.pack(pady=5)
+        btn_no = tk.Button(root, text="Нет", width=10, command=answer_no)
+        btn_no.pack(pady=5)
+
+    def show_message(message, callback=None):
+        for widget in root.winfo_children():
+            widget.destroy()
+        label = tk.Label(root, text=message, font=("Arial", 12))
+        label.pack(pady=20)
+        def proceed():
+            if callback:
+                callback()
+            else:
+                finish(None)
+        btn_ok = tk.Button(root, text="OK", command=proceed)
+        btn_ok.pack()
+
+    def show_difficulty_selection():
+        for widget in root.winfo_children():
+            widget.destroy()
+        label = tk.Label(root, text="Выберите уровень сложности:", wraplength=380, font=("Arial", 12))
+        label.pack(pady=10)
+
+        def select_level(level):
+            for widget in root.winfo_children():
+                widget.destroy()
+            show_message(f"Вы выбрали уровень: {level}. Удачи!", lambda: finish(level))
+
+        btn_easy = tk.Button(root, text="Легкий", width=10, command=lambda: select_level("easy"))
+        btn_easy.pack(pady=5)
+        btn_medium = tk.Button(root, text="Средний", width=10, command=lambda: select_level("medium"))
+        btn_medium.pack(pady=5)
+        btn_hard = tk.Button(root, text="Сложный", width=10, command=lambda: select_level("hard"))
+        btn_hard.pack(pady=5)
+        btn_expert = tk.Button(root, text="Эксперт", width=10, command=lambda: select_level("expert"))
+        btn_expert.pack(pady=5)
+
+    def finish(level):
+        root.destroy()
+        if callback_on_complete:
+            callback_on_complete(level)
+
+    def ask_training():
+        def on_response():
+            answer = messagebox.askyesno("Обучение", "Вы хотите пройти обучение?")
+            if answer:
+                import sys
+                sys.path.insert(0, 'src')
+                from scr import obuchenie
+                obuchenie.primer()
+                show_message("Обучение завершено. Можно начать игру.", lambda: finish(None))
+            else:
+                show_message("Тогда до свидания!", lambda: finish(None))
+        from tkinter import messagebox
+        on_response()
+
+    ask_question()
