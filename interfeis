@@ -1,0 +1,52 @@
+import time
+import math
+import tkinter as tk
+from tkinter import messagebox
+
+def create_sudoku_app(master, puzzle, solution, num_to_remove):
+    entries = []
+    def create_sudoku_grid():
+        main_frame = tk.Frame(master)
+        main_frame.pack()
+
+        for block_row in range(3):
+            for block_col in range(3):
+                block_frame = tk.Frame(
+                    main_frame,
+                    borderwidth=2,
+                    relief='solid'
+                )
+                block_frame.grid(row=block_row, column=block_col, padx=2, pady=2)
+
+                for cell_row in range(3):
+                    for cell_col in range(3):
+                        r = block_row * 3 + cell_row
+                        c = block_col * 3 + cell_col
+                        value = puzzle[r][c]
+                        entry = tk.Entry(
+                            block_frame,
+                            width=2,
+                            font=('Arial', 18),
+                            justify='center',
+                            relief='solid',
+                            borderwidth=1
+                        )
+                        entry.grid(row=cell_row, column=cell_col, padx=1, pady=1)
+                        if value != 0:
+                            entry.insert(0, str(value))
+                            entry.config(state='disabled', disabledforeground='blue')
+                        entries.append((r, c, entry))
+
+    def check_solution(start_time, num_to_remove):
+        for r, c, entry in entries:
+            val = entry.get()
+            if not val.isdigit() or int(val) != solution[r][c]:
+                messagebox.showinfo("Результат", "Неверно")
+                master.after(5000, lambda: None)
+                return
+        end_time = time.time()
+        messagebox.showinfo("Результат", "Верно! Ваши очки: " + str(math.ceil(((num_to_remove * 60) ** 1.5) / (math.ceil((end_time - start_time) ** 0.5)))))
+    create_sudoku_grid()
+    start_time = time.time()
+    check_button = tk.Button(master, text="Проверить решение", command=lambda: check_solution(start_time, num_to_remove))
+    check_button.pack(pady=10)
