@@ -1,0 +1,156 @@
+import random
+
+def pust_kletka(grid):
+    for row in range(9):
+        for col in range(9):
+            if grid[row][col] == 0:
+                return (row, col)
+    return None
+
+
+def ochki(grid):
+    count = 0
+    
+    for row in range(9):
+        for col in range(9):
+            if grid[row][col] == 0:
+                count += 1
+    
+    if count <= 30:
+        result = count
+    elif 31 <= count <= 37:
+        result = count * 2
+    elif 38 <= count <= 45:
+        result = count * 3
+    else:
+        result = count * 4
+    return result
+
+def proverka(grid, num, pos):
+    row, col = pos
+    
+    for i in range(9):
+        if grid[row][i] == num and i!= col:
+            return False
+        if grid[i][col] == num and i!= row:
+            return False
+
+    box_x = col // 3
+    box_y = row // 3
+
+    for i in range(box_y * 3, box_y * 3 + 3):
+        for j in range(box_x * 3, box_x * 3 + 3):
+            if grid[i][j] == num and (i, j) != pos:
+                return False
+
+    return True
+
+def reshenie(grid):
+    empty_location = pust_kletka(grid)
+    
+    if not empty_location:
+        return True
+
+    row, col = empty_location
+    numbers = list(range(1, 10))
+    random.shuffle(numbers)
+    
+    for num in numbers:
+        if proverka(grid, num, (row, col)):
+            grid[row][col] = num
+            if reshenie(grid):
+                return True
+
+            grid[row][col] = 0
+
+    return False
+
+def generate_full_solution():
+    grid = [[0 for _ in range(9)] for _ in range(9)]
+
+    for i in range(0, 9, 3):
+            numbers = list(range(1, 10))
+            random.shuffle(numbers)
+            index = 0
+            for row in range(i, i + 3):
+                for col in range(i, i + 3):
+                    grid[row][col] = numbers[index]
+                    index += 1
+    
+    reshenie(grid)
+    return grid
+
+def generate_sudoku(difficulty):
+    grid = generate_full_solution()
+    
+    if difficulty == "easy":
+        num_to_remove = random.randint(25, 30)
+    elif difficulty == "medium":
+        num_to_remove = random.randint(31, 37)
+    elif difficulty == "hard":
+        num_to_remove = random.randint(38, 45)
+    elif difficulty == "expert":
+        num_to_remove = random.randint(46, 54)
+    else:
+        raise ValueError("Invalid difficulty level.")
+    
+    attempts = 0
+    clues = 81
+    
+    while clues > (81 - num_to_remove):
+        row = random.randint(0, 8)
+        col = random.randint(0, 8)
+        if grid[row][col] != 0:
+            temp_value = grid[row][col]
+            grid[row][col] = 0
+            temp_grid = [row[:] for row in grid] 
+            if count_solutions(temp_grid) == 1:
+                clues -= 1
+            else:
+                attempts += 1
+                grid[row][col] = temp_value
+                temp_grid = [row[:] for row in grid] 
+        if attempts >= 200:
+            clues = 81
+            grid = generate_full_solution()
+            attempts = 0
+    
+    return grid
+
+def count_solutions(grid):
+    empty_location = pust_kletka(grid)
+    
+    if not empty_location:
+        return 1
+
+    row, col = empty_location
+    solution_count = 0
+
+
+    for num in range(1, 10):
+        if proverka(grid, num, (row, col)):
+            grid[row][col] = num
+
+            solution_count += count_solutions(grid)
+
+            if solution_count > 1:
+                grid[row][col] = 0 
+                return solution_count
+
+            grid[row][col] = 0
+
+    return solution_count
+
+def print_grid(grid):
+    for i in range(9):
+        if i % 3 == 0 and i != 0:
+            print("- - - - - - - - - - - - ")
+
+        for j in range(9):
+            if j % 3 == 0 and j != 0:
+                print(" | ", end = "")
+
+            if j == 8:
+                print(grid[i][j])
+            else:
+                print(str(grid[i][j]) + " ", end = "")
