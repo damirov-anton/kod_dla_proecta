@@ -1,0 +1,94 @@
+import sys
+import tkinter as tk
+from tkinter import messagebox
+sys.path.insert(0, 'src')
+
+from scr import generator, obuchenie, interfeis, razgovor
+
+def main():
+    root = tk.Tk()
+    root.withdraw()
+
+    def start_game(level):
+        if level:
+            try:
+                sudoku_puzzle = generator.generate_sudoku(level)
+                solution_grid = [row[:] for row in sudoku_puzzle]
+                print(f"Генерация судоку для уровня: {level}")
+                print("Начальная головоломка:")
+                generator.print_grid(sudoku_puzzle)
+                generator.reshenie(solution_grid)
+                print("Решение:")
+                generator.print_grid(solution_grid)
+                ochki = generator.ochki(sudoku_puzzle)
+                game_window = tk.Toplevel()
+                game_window.title("Судоку")
+                interfeis.create_sudoku_app(game_window, sudoku_puzzle, solution_grid, ochki)
+                game_window.mainloop()
+            except Exception as e:
+                print(f"Ошибка: {e}")
+        else:
+            print("Игра отменена.")
+
+    def ask_play_or_learn():
+        def on_dialog_complete(level):
+            if level:
+                start_game(level)
+            else:
+                offer_training()
+
+        razgovor.start_sudoku_dialog(callback_on_complete=on_dialog_complete)
+
+    def offer_training():
+        answer = messagebox.askyesno("Обучение", "Вы хотите пройти обучение?")
+        if answer:
+            obuchenie.primer()
+            messagebox.showinfo("Обучение", "Обучение завершено. Можно начать игру.")
+            ask_play_or_learn()
+        else:
+            messagebox.showinfo("До свидания", "Тогда до свидания!")
+            root.destroy()
+            exit()
+
+    def initial_question():
+        answer = messagebox.askyesno("Судоку", "Будете играть в Судоку?")
+        if answer:
+            show_difficulty_selection(after_level=start_game)
+        else:
+            def after_training_decision():
+                answer_train = messagebox.askyesno("Обучение", "Вы хотите пройти обучение?")
+                if answer_train:
+                    obuchenie.primer()
+                    messagebox.showinfo("Обучение", "Обучение завершено. Можно начать игру.")
+                    initial_question()
+                else:
+                    messagebox.showinfo("До свидания", "Тогда до свидания!")
+                    root.destroy()
+                    exit()
+            after_training_decision()
+
+    def show_difficulty_selection(after_level):
+        window = tk.Toplevel()
+        window.title("Уровень сложности")
+        tk.Label(window, text="Выберите уровень сложности:").pack(pady=10)
+
+        levels = {
+            "Легкий": "easy",
+            "Средний": "medium",
+            "Сложный": "hard",
+            "Эксперт": "expert"
+        }
+
+        def select_level(level_name):
+            window.destroy()
+            after_level(levels[level_name])
+
+        for name in levels:
+            btn = tk.Button(window, text=name, command=lambda n=name: select_level(n))
+            btn.pack(pady=5)
+    
+    initial_question()
+    root.mainloop()
+
+if __name__ == "__main__":
+    main()
